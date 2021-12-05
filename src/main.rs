@@ -8,35 +8,61 @@ use std::time::Duration;
 
 const WIDTH: u32 = 800;
 const HEIGHT: u32 = 800;
+const MOVE_MULTIPLIER: i32 = 5;
 const BACKGROUND: Color = Color::RGB(0, 255, 255);
+
+struct Snake {
+    body: Vec<(i32, i32)>,
+    heading: (i32, i32),
+}
 
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
-    let mut pos_x: i32 = 100;
-    let mut pos_y: i32 = 100;
-
     let window = video_subsystem
-        .window("rust-sdl2 demo", WIDTH, HEIGHT)
+        .window("snejk", WIDTH, HEIGHT)
         .position_centered()
         .build()
         .unwrap();
 
     let mut canvas = window.into_canvas().build().unwrap();
-
     canvas.set_draw_color(BACKGROUND);
     canvas.clear();
     canvas.present();
+
+    let mut snake = Snake {
+        body: vec![((WIDTH as i32) / 2, (HEIGHT as i32) / 2)],
+        heading: (1, 0),
+    };
+
+    let mut food = Food { x: 100, y: 100 };
+
     let mut event_pump = sdl_context.event_pump().unwrap();
-    let mut i = 0;
+    let mut color_i = 0;
     'running: loop {
+        // clear bg
         canvas.set_draw_color(BACKGROUND);
         canvas.clear();
 
-        i = (i + 1) % 255;
-        canvas.set_draw_color(Color::RGB(i, 64, 255 - i));
-        canvas.fill_rect(Rect::new(pos_x, pos_y, 20, 20)).unwrap();
+        // prepare color
+        color_i = (color_i + 1) % 255;
+        canvas.set_draw_color(Color::RGB(color_i, 64, 255 - color_i));
+
+        // draw body
+        for (x, y) in &snake.body {
+            canvas.fill_rect(Rect::new(*x, *y, 20, 20)).unwrap();
+        }
+
+        // perform move
+        for piece in snake.body.iter_mut() {
+            *piece = (
+                piece.0 + snake.heading.0 * MOVE_MULTIPLIER,
+                piece.1 + snake.heading.1 * MOVE_MULTIPLIER,
+            );
+        }
+
+        // key handling
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. }
@@ -51,19 +77,19 @@ pub fn main() {
                 Event::KeyDown {
                     keycode: Some(Keycode::W),
                     ..
-                } => pos_y -= 5,
+                } => snake.heading = (0, -1),
                 Event::KeyDown {
                     keycode: Some(Keycode::S),
                     ..
-                } => pos_y += 5,
+                } => snake.heading = (0, 1),
                 Event::KeyDown {
                     keycode: Some(Keycode::A),
                     ..
-                } => pos_x -= 5,
+                } => snake.heading = (-1, 0),
                 Event::KeyDown {
                     keycode: Some(Keycode::D),
                     ..
-                } => pos_x += 5,
+                } => snake.heading = (1, 0),
                 _ => {}
             }
         }
