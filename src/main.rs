@@ -10,10 +10,16 @@ const WIDTH: u32 = 800;
 const HEIGHT: u32 = 800;
 const MOVE_MULTIPLIER: i32 = 5;
 const BACKGROUND: Color = Color::RGB(0, 255, 255);
+const RED: Color = Color::RGB(255, 0, 0);
 
 struct Snake {
     body: Vec<(i32, i32)>,
     heading: (i32, i32),
+}
+
+struct Food {
+    x: i32,
+    y: i32,
 }
 
 pub fn main() {
@@ -38,6 +44,11 @@ pub fn main() {
 
     let mut food = Food { x: 100, y: 100 };
 
+    // lengtens next frame after food eaten
+    let mut lengten = false;
+
+    let mut tail_piece;
+
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut color_i = 0;
     'running: loop {
@@ -54,12 +65,30 @@ pub fn main() {
             canvas.fill_rect(Rect::new(*x, *y, 20, 20)).unwrap();
         }
 
+        // draw food
+        canvas.set_draw_color(RED);
+        canvas.fill_rect(Rect::new(food.x, food.y, 20, 20)).unwrap();
+
+        // capture last piece
+        tail_piece = snake.body[snake.body.len() - 1];
+
         // perform move
         for piece in snake.body.iter_mut() {
             *piece = (
                 piece.0 + snake.heading.0 * MOVE_MULTIPLIER,
                 piece.1 + snake.heading.1 * MOVE_MULTIPLIER,
             );
+        }
+        if lengten {
+            snake.body.push(tail_piece);
+            lengten = false;
+        }
+
+        // handle food
+        if snake.body[0].0 == food.x && snake.body[0].1 == food.y {
+            lengten = true;
+            food.x = 300;
+            food.y = 300;
         }
 
         // key handling
