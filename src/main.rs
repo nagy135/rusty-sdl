@@ -1,7 +1,6 @@
 extern crate sdl2;
 
-#[allow(unused_imports)]
-use chrono::{offset::Utc, DateTime, Timelike};
+use chrono::Utc;
 
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -60,6 +59,7 @@ pub fn main() {
     let mut lengten = false;
 
     let mut tail_piece;
+    let mut head_piece;
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut color_i = 0;
@@ -105,15 +105,15 @@ pub fn main() {
 
             // capture last piece
             tail_piece = snake.body[snake.body.len() - 1];
+            head_piece = snake.body[0];
 
             // perform move
-            for piece in snake.body.iter_mut() {
-                *piece = (
-                    piece.0 + snake.heading.0 * BLOCK_SIZE as i32,
-                    piece.1 + snake.heading.1 * BLOCK_SIZE as i32,
-                );
-            }
-            // println!("body {:?}", snake.body);
+            snake.body.rotate_right(1);
+            snake.body[0] = (
+                head_piece.0 + snake.heading.0 * BLOCK_SIZE as i32,
+                head_piece.1 + snake.heading.1 * BLOCK_SIZE as i32,
+            );
+
             if lengten {
                 snake.body.push(tail_piece);
                 lengten = false;
