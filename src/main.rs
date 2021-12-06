@@ -16,7 +16,7 @@ const BLOCK_SIZE: u32 = 20;
 
 const TICK_RATE: i64 = 100; // tick every N milis
 
-const BACKGROUND: Color = Color::RGB(0, 255, 255);
+const BACKGROUND: Color = Color::RGB(200, 200, 200);
 const RED: Color = Color::RGB(255, 0, 0);
 
 struct Snake {
@@ -121,13 +121,15 @@ pub fn main() {
 
             // handle food
             if snake.body[0].0 >= food.x
-                && snake.body[0].0 <= food.x + BLOCK_SIZE as i32
+                && snake.body[0].0 < food.x + BLOCK_SIZE as i32
                 && snake.body[0].1 >= food.y
-                && snake.body[0].1 <= food.y + BLOCK_SIZE as i32
+                && snake.body[0].1 < food.y + BLOCK_SIZE as i32
             {
                 lengten = true;
-                food.x = (rng.gen::<u32>() % (WIDTH + BLOCK_SIZE)) as i32;
-                food.y = (rng.gen::<u32>() % (HEIGHT + BLOCK_SIZE)) as i32;
+                food.x =
+                    ((rng.gen::<u32>() % (WIDTH + BLOCK_SIZE)) % BLOCK_SIZE * BLOCK_SIZE) as i32;
+                food.y =
+                    ((rng.gen::<u32>() % (HEIGHT + BLOCK_SIZE)) % BLOCK_SIZE * BLOCK_SIZE) as i32;
             }
         }
 
